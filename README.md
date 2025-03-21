@@ -1,6 +1,6 @@
 Updated for SPT 3.11.1
 
-# This mod will pause the following:
+This mod will pause the following:
 - You
   - Character movement
   - Health
