@@ -1,29 +1,30 @@
+using System.Reflection;
 using BepInEx;
-using UnityEngine;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using SPT.Reflection.Patching;
 using EFT;
-using System.Reflection;
+using JetBrains.Annotations;
+using SPT.Reflection.Patching;
+using UnityEngine;
 
 namespace Pause
 {
-    [BepInPlugin("com.dvize.pause", "PAUSE", "1.2.0")]
+    [BepInPlugin("com.netVnum.pause", "PAUSE", "1.3.0")]
     public class Plugin : BaseUnityPlugin
     {
+
         internal static ConfigEntry<KeyboardShortcut> TogglePause;
         internal static ManualLogSource Log;
 
-        void Awake()
+        [UsedImplicitly]
+        private void Awake()
         {
-            Log = base.Logger;
-
+            Log = Logger;
             TogglePause = Config.Bind("Keybinds", "Toggle Pause", new KeyboardShortcut(KeyCode.F9));
-            Logger.LogInfo($"PAUSE: Loading");
+            Logger.LogInfo("PAUSE: Loading");
 
-            new NewGamePatch().Enable();    
+            new NewGamePatch().Enable();
 
-            //Tick Patches
             new WorldTickPatch().Enable();
             new OtherWorldTickPatch().Enable();
             new GameTimerClassUpdatePatch().Enable();
@@ -31,7 +32,6 @@ namespace Pause
             new PlayerUpdatePatch().Enable();
             new EndByTimerScenarioUpdatePatch().Enable();
 
-            //Base Local Game Patches
             new BaseLocalGameUpdatePatch().Enable();
         }
 

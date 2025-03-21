@@ -1,4 +1,4 @@
 .vs
 .vscode
-source/bin
-source/obj
+bin
+obj

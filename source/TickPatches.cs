@@ -1,8 +1,8 @@
-using System.Reflection;
-using SPT.Reflection.Patching;
 using EFT;
 using EFT.UI.BattleTimer;
 using HarmonyLib;
+using SPT.Reflection.Patching;
+using System.Reflection;
 using TMPro;
 
 namespace Pause
@@ -12,20 +12,17 @@ namespace Pause
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.DoWorldTick));
 
         [PatchPrefix]
-        // various world ticks
         internal static bool Prefix(GameWorld __instance, float dt)
         {
-            if (PauseController.IsPaused)
+            if (!PauseController.IsPaused)
             {
-                // invoking the PlayerTick to prevent hand jank
-                typeof(GameWorld)
-                        .GetMethod("PlayerTick", BindingFlags.Instance | BindingFlags.Public)
-                        .Invoke(__instance, new object[] { dt });
-
-                return false;
+                return true;
             }
 
-            return true;
+            typeof(GameWorld).GetMethod("PlayerTick", BindingFlags.Instance | BindingFlags.Public)
+                ?.Invoke(__instance, new object[] { dt });
+
+            return false;
         }
     }
 
@@ -34,7 +31,6 @@ namespace Pause
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.DoOtherWorldTick));
 
         [PatchPrefix]
-        // it looks like this just calls the player's update ticks
         internal static bool Prefix(GameWorld __instance)
         {
             return !PauseController.IsPaused;
@@ -59,17 +55,16 @@ namespace Pause
         [PatchPrefix]
         internal static bool Prefix(TextMeshProUGUI ____timerText)
         {
-            // patch for 'fake' gaame ui timer when you press o
-            // set the text to PAUSED for fun
-            if (PauseController.IsPaused)
+            if (!PauseController.IsPaused)
             {
-                ____timerText.SetMonospaceText("PAUSED", false);
-                return false;
+                return true;
             }
 
-            return true;
+            ____timerText.SetMonospaceText("PAUSED", false);
+            return false;
         }
     }
+
     public class PlayerUpdatePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.UpdateTick));
@@ -91,5 +86,4 @@ namespace Pause
             return !PauseController.IsPaused;
         }
     }
-
 }
